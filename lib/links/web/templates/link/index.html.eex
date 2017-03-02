@@ -1,0 +1,24 @@
+<%= link "New", to: link_path(@conn, :new), class: "ui basic button" %>
+
+<div class="ui very relaxed list">
+  <%= for link <- @links do %>
+  <div class="item">
+    <div class="right floated content">
+      <div class="ui icon basic button">
+        <%= link to: link_path(@conn, :delete, link),
+            method: :delete, data: [confirm: "Are you sure?"] do %>
+          <i class="trash icon"></i>
+        <% end %>
+      </div>
+
+      <a href="<%= link_path(@conn, :edit, link) %>" class="ui icon basic button">
+        <i class="edit icon"></i>
+      </a>
+    </div>
+    <i class="<%= if link.archived, do: "archive", else: "linkify" %> large icon"></i>
+    <div class="content">
+    <a href="<%= link.link %>" target="_blank" class="header"><%= link.link %></a>
+    </div>
+  </div>
+  <% end %>
+</div>

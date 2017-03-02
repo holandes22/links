@@ -14,13 +14,9 @@ defmodule Links.Web.Router do
   end
 
   scope "/", Links.Web do
-    pipe_through :browser # Use the default browser stack
+    pipe_through :browser
 
-    get "/", PageController, :index
+    resources "/", LinkController
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", Links.Web do
-  #   pipe_through :api
-  # end
 end
