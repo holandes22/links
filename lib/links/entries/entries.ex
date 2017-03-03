@@ -17,8 +17,36 @@ defmodule Links.Entries do
       [%Link{}, ...]
 
   """
-  def list_links do
-    Repo.all(Link)
+  @filter_names ~w(archived)
+  @filter_types %{archived: :boolean}
+
+  def params_to_filters(params) do
+    params
+      |> Enum.filter(fn({key, value}) -> Enum.member?(@filter_names, key) && value != "" end)
+      |> Enum.map(fn({key, value}) -> {String.to_existing_atom(key), value} end)
+  end
+
+  def link_query(params) do
+    changeset =
+      {%{}, @filter_types}
+      |> cast(params, [:archived])
+
+    case changeset.valid? do
+      true ->
+        filters = params_to_filters(params)
+        from link in Link,
+          where: ^filters,
+          select: link
+
+      false ->
+        Link
+    end
+  end
+
+  def list_links(params \\ %{}) do
+    params
+      |> link_query
+      |> Repo.all()
   end
 
   @doc """

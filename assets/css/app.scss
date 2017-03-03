@@ -1,4 +1,8 @@
 .ui.main {
-  padding-top: 5em;
-  padding-bottom: 4.5rem;
+  padding-top: 8em;
+}
+
+.ui.top.fixed.menu.toolbar {
+  z-index: 90;
+  top: 57px;
 }

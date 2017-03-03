@@ -3,8 +3,8 @@ defmodule Links.Web.LinkController do
 
   alias Links.Entries
 
-  def index(conn, _params) do
-    links = Entries.list_links()
+  def index(conn, params) do
+    links = Entries.list_links(params)
     render(conn, "index.html", links: links)
   end
 

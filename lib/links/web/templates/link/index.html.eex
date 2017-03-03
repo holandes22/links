@@ -1,4 +1,10 @@
-<%= link "New", to: link_path(@conn, :new), class: "ui basic button" %>
+<div class="ui top fixed menu toolbar">
+  <div class="ui container">
+    <div class="item">
+      <%= link "New", to: link_path(@conn, :new), class: "ui basic blue button" %>
+    </div>
+  </div>
+</div>
 
 <div class="ui very relaxed list">
   <%= for link <- @links do %>
