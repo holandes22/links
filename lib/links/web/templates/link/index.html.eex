@@ -3,8 +3,22 @@
     <div class="item">
       <%= link "New", to: link_path(@conn, :new), class: "ui basic blue button" %>
     </div>
+    <%= form_for @conn, link_path(@conn, :index), [as: :filters, method: :get], fn f -> %>
+      <%= checkbox f, :archived %>
+      <%= submit "Filter" %>
+    <% end %>
+    <div class="item">
+      <%= link "Clear filters", to: link_path(@conn, :index), class: "ui basic blue button" %>
+    </div>
   </div>
 </div>
+
+<%= if @filters do %>
+  <div>
+    Filtering by:
+    <%= Poison.encode!(@filters) %>
+  </div>
+<% end %>
 
 <div class="ui very relaxed list">
   <%= for link <- @links do %>

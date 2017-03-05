@@ -3,9 +3,13 @@ defmodule Links.Web.LinkController do
 
   alias Links.Entries
 
-  def index(conn, params) do
-    links = Entries.list_links(params)
-    render(conn, "index.html", links: links)
+  def index(conn, %{"filters" => filters}) do
+    links = Entries.list_links(filters)
+    render(conn, "index.html", %{links: links, filters: filters})
+  end
+  def index(conn, _params) do
+    links = Entries.list_links()
+    render(conn, "index.html", links: links, filters: nil)
   end
 
   def new(conn, _params) do
