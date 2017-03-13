@@ -37,7 +37,27 @@
     </div>
     <i class="<%= if link.archived, do: "archive", else: "linkify" %> large icon"></i>
     <div class="content">
-    <a href="<%= link.link %>" target="_blank" class="header"><%= link.link %></a>
+      <a href="<%= link.link %>" target="_blank" class="header"><%= link.link %></a>
+
+      <div class="description">
+        <%= if link.notes != "" do %>
+          <%= link.notes %>
+        <% else %>
+          No description
+        <% end %>
+      </div>
+
+      <!-- TODO: properly format date -->
+      Created <%= from_now(link.inserted_at) %> |
+
+      <%= if Enum.empty? link.tags do %>
+        <div class="ui label">Untagged</div>
+      <% else %>
+        <%= for tag <- link.tags do %>
+          <div class="ui violet basic label"><%= tag.name %></div>
+        <% end %>
+      <% end %>
+
     </div>
   </div>
   <% end %>

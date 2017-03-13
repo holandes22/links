@@ -14,5 +14,17 @@ defmodule Links.Web.HtmlHelpers do
     """ |> raw
   end
 
+  def link_tags_input(tags) do
+    value =
+      tags
+      |> Enum.map(& &1.name)
+      |> Enum.join(",")
+
+    """
+    <input id="link_tags" name="link[tags]" type="text" value="#{value}">
+    """ |> raw
+
+  end
+
 
 end

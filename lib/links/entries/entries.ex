@@ -138,6 +138,7 @@ defmodule Links.Entries do
 
   defp link_changeset(%Link{} = link, attrs) do
     link
+    |> Repo.preload(:tags)
     |> cast(attrs, [:archived, :notes, :link])
     |> put_assoc(:tags, parse_tags(attrs))
     |> validate_required([:archived, :link])
@@ -146,9 +147,15 @@ defmodule Links.Entries do
   defp parse_tags(attrs) do
     (attrs[:tags] || attrs["tags"] || "")
     |> String.split(",")
-    |> Enum.map(&String.trim/1)
+    |> Enum.map(&normalize_tag/1)
     |> Enum.reject(& &1 == "")
     |> insert_and_get_all()
+  end
+
+  defp normalize_tag(tag) do
+    tag
+    |> String.trim()
+    |> String.downcase()
   end
 
   defp insert_and_get_all([]), do: []

@@ -40,6 +40,7 @@ defmodule Links.Web do
       import Links.Web.ErrorHelpers
       import Links.Web.Gettext
       import Links.Web.HtmlHelpers
+      import Timex, only: [from_now: 1]
     end
   end
 

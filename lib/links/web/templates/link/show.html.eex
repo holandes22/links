@@ -17,6 +17,13 @@
     <%= @link.link %>
   </li>
 
+  <li>
+    <strong>Tags:</strong>
+    <%= for tag <- @link.tags do %>
+      <%= tag.name %>
+    <% end %>
+  </li>
+
 </ul>
 
 <span><%= link "Edit", to: link_path(@conn, :edit, @link) %></span>
