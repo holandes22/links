@@ -4,9 +4,9 @@ defmodule Links.EntriesTest do
   alias Links.Entries
   alias Links.Entries.Link
 
-  @create_attrs %{archived: true, link: "some link", notes: "some notes"}
-  @update_attrs %{archived: false, link: "some updated link", notes: "some updated notes"}
-  @invalid_attrs %{archived: nil, link: nil, notes: nil}
+  @create_attrs %{archived: true, link: "some link", notes: "some notes", tags: "a,b,c"}
+  @update_attrs %{archived: false, link: "some updated link", notes: "some updated notes", tags: "d,e"}
+  @invalid_attrs %{archived: nil, link: nil, notes: nil, tags: nil}
 
   def fixture(:link, attrs \\ @create_attrs) do
     {:ok, link} = Entries.create_link(attrs)
@@ -24,7 +24,7 @@ defmodule Links.EntriesTest do
     assert Entries.list_links() == [link]
   end
 
-  describe "list_links/1 with filters" do
+  describe "list_links/1 filtering by archived" do
     setup [:filter_fixtures]
 
     for value <- [1, "aaa", "11", ""] do
@@ -60,6 +60,7 @@ defmodule Links.EntriesTest do
     assert link.archived == true
     assert link.link == "some link"
     assert link.notes == "some notes"
+    assert Enum.map(link.tags, (& &1.name)) == ~w(a b c)
   end
 
   test "create_link/1 with invalid data returns error changeset" do
@@ -74,6 +75,7 @@ defmodule Links.EntriesTest do
     assert link.archived == false
     assert link.link == "some updated link"
     assert link.notes == "some updated notes"
+    assert Enum.map(link.tags, (& &1.name)) == ~w(d e)
   end
 
   test "update_link/2 with invalid data returns error changeset" do

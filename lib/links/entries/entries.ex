@@ -6,7 +6,7 @@ defmodule Links.Entries do
   import Ecto.{Query, Changeset}, warn: false
   alias Links.Repo
 
-  alias Links.Entries.Link
+  alias Links.Entries.{Link, Tag}
 
   @doc """
   Returns the list of links.
@@ -36,16 +36,18 @@ defmodule Links.Entries do
         filters = params_to_filters(params)
         from link in Link,
           where: ^filters,
-          select: link
+          select: link,
+          preload: [:tags]
 
       false ->
-        Link
+        from link in Link,
+          preload: [:tags]
     end
   end
 
   def list_links(params \\ %{}) do
     params
-      |> link_query
+      |> link_query()
       |> Repo.all()
   end
 
@@ -63,7 +65,11 @@ defmodule Links.Entries do
       ** (Ecto.NoResultsError)
 
   """
-  def get_link!(id), do: Repo.get!(Link, id)
+  def get_link!(id) do
+    Link
+    |> Repo.get!(id)
+    |> Repo.preload(:tags)
+  end
 
   @doc """
   Creates a link.
@@ -133,6 +139,23 @@ defmodule Links.Entries do
   defp link_changeset(%Link{} = link, attrs) do
     link
     |> cast(attrs, [:archived, :notes, :link])
-    |> validate_required([:archived, :notes, :link])
+    |> put_assoc(:tags, parse_tags(attrs))
+    |> validate_required([:archived, :link])
   end
+
+  defp parse_tags(attrs) do
+    (attrs[:tags] || attrs["tags"] || "")
+    |> String.split(",")
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(& &1 == "")
+    |> insert_and_get_all()
+  end
+
+  defp insert_and_get_all([]), do: []
+  defp insert_and_get_all(names) do
+    maps = Enum.map(names, &%{name: &1})
+    Repo.insert_all Tag, maps, on_conflict: :nothing
+    Repo.all from t in Tag, where: t.name in ^names
+  end
+
 end
