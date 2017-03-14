@@ -4,9 +4,10 @@ defmodule Links.EntriesTest do
   alias Links.Entries
   alias Links.Entries.Link
 
-  @create_attrs %{archived: true, link: "some link", notes: "some notes", tags: "a,b,c"}
-  @update_attrs %{archived: false, link: "some updated link", notes: "some updated notes", tags: "d,e"}
+  @create_attrs %{archived: true, link: "http://a.com", notes: "some notes", tags: "a-a,b-1,c"}
+  @update_attrs %{archived: false, link: "http://b.com", notes: "some updated notes", tags: "2,e"}
   @invalid_attrs %{archived: nil, link: nil, notes: nil, tags: nil}
+
 
   def fixture(:link, attrs \\ @create_attrs) do
     {:ok, link} = Entries.create_link(attrs)
@@ -58,9 +59,21 @@ defmodule Links.EntriesTest do
     assert {:ok, %Link{} = link} = Entries.create_link(@create_attrs)
 
     assert link.archived == true
-    assert link.link == "some link"
+    assert link.link == @create_attrs.link
     assert link.notes == "some notes"
-    assert Enum.map(link.tags, (& &1.name)) == ~w(a b c)
+    assert Enum.map(link.tags, (& &1.name)) == ~w(a-a b-1 c)
+  end
+
+  test "create_link/1 with invalid urls returns error changeset" do
+    invalid_urls = ["http://a:80.com", "htt://a.com"]
+
+    for url <- invalid_urls do
+      params =  Map.merge(@create_attrs, %{link: url})
+      assert {:error, %Ecto.Changeset{} = changeset} = Entries.create_link(params)
+      refute changeset.valid?
+      assert [link: {"is an invalid URL", []}] = changeset.errors
+    end
+
   end
 
   test "create_link/1 with invalid data returns error changeset" do
@@ -73,9 +86,9 @@ defmodule Links.EntriesTest do
     assert %Link{} = link
 
     assert link.archived == false
-    assert link.link == "some updated link"
+    assert link.link == @update_attrs.link
     assert link.notes == "some updated notes"
-    assert Enum.map(link.tags, (& &1.name)) == ~w(d e)
+    assert Enum.map(link.tags, (& &1.name)) == ~w(2 e)
   end
 
   test "update_link/2 with invalid data returns error changeset" do

@@ -4,9 +4,10 @@ defmodule Links.Entries do
   """
 
   import Ecto.{Query, Changeset}, warn: false
-  alias Links.Repo
 
+  alias Links.Repo
   alias Links.Entries.{Link, Tag}
+  alias Links.Web.Validator
 
   @doc """
   Returns the list of links.
@@ -140,8 +141,9 @@ defmodule Links.Entries do
     link
     |> Repo.preload(:tags)
     |> cast(attrs, [:archived, :notes, :link])
-    |> put_assoc(:tags, parse_tags(attrs))
     |> validate_required([:archived, :link])
+    |> Validator.validate_url(:link)
+    |> put_assoc(:tags, parse_tags(attrs))
   end
 
   defp parse_tags(attrs) do
