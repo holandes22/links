@@ -19,18 +19,13 @@ defmodule Links.Web.LinkController do
 
   def create(conn, %{"link" => link_params}) do
     case Entries.create_link(link_params) do
-      {:ok, link} ->
+      {:ok, _link} ->
         conn
         |> put_flash(:info, "Link created successfully.")
-        |> redirect(to: link_path(conn, :show, link))
+        |> redirect(to: link_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
-  end
-
-  def show(conn, %{"id" => id}) do
-    link = Entries.get_link!(id)
-    render(conn, "show.html", link: link)
   end
 
   def edit(conn, %{"id" => id}) do
@@ -43,10 +38,10 @@ defmodule Links.Web.LinkController do
     link = Entries.get_link!(id)
 
     case Entries.update_link(link, link_params) do
-      {:ok, link} ->
+      {:ok, _link} ->
         conn
         |> put_flash(:info, "Link updated successfully.")
-        |> redirect(to: link_path(conn, :show, link))
+        |> redirect(to: link_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", link: link, changeset: changeset)
     end

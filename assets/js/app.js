@@ -24,5 +24,4 @@ import $ from "jquery";
 $(".message .close")
   .on("click", function() {
     $(this).parent(".message").fadeOut();
-  })
-;
+  });

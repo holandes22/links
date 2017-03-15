@@ -16,7 +16,7 @@ defmodule Links.Web.Router do
   scope "/", Links.Web do
     pipe_through :browser
 
-    resources "/", LinkController
+    resources "/", LinkController, except: [:show]
   end
 
 end
