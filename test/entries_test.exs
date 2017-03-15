@@ -51,6 +51,44 @@ defmodule Links.EntriesTest do
 
   end
 
+  describe "list_links/1 filtering by tags" do
+
+    test "returns all that contain at least that tag" do
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,b"}))
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "c"}))
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a"}))
+
+      assert length(Entries.list_links(%{"tags" => "a"})) == 2
+
+    end
+
+    test "returns all that contain all the tags" do
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,b"}))
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "c"}))
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "d"}))
+
+      assert length(Entries.list_links(%{"tags" => "a,b,c"})) == 2
+
+    end
+
+    test "returns empty if no match" do
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,b"}))
+
+      assert [] == Entries.list_links(%{"tags" => "c"})
+
+    end
+
+    test "returns all matching with other filters" do
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,b", archived: true}))
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "c", archived: false}))
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "d", archived: true}))
+
+      assert length(Entries.list_links(%{"tags" => "a,b,c", "archived" => true})) == 1
+
+    end
+
+  end
+
   test "get_link! returns the link with given id" do
     link = fixture(:link)
     assert Entries.get_link!(link.id) == link

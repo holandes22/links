@@ -19,30 +19,40 @@ defmodule Links.Entries do
 
   """
   @filter_names ~w(archived)
-  @filter_types %{archived: :boolean}
+  @filter_types %{archived: :boolean, tags: :string}
 
   def params_to_filters(params) do
-    params
+    filters =
+      params
       |> Enum.filter(fn({key, value}) -> Enum.member?(@filter_names, key) && value != "" end)
       |> Enum.map(fn({key, value}) -> {String.to_existing_atom(key), value} end)
+
+    tag_filters = parse_tags(params, "tags")
+
+    {filters, tag_filters}
+
   end
 
-  def link_query(params) do
-    changeset =
-      {%{}, @filter_types}
-      |> cast(params, [:archived])
+  defp valid_filters?(params) do
+    struct = {%{}, @filter_types}
+    filters_cs = cast(struct, params, [:archived])
+    tag_filters_cs = cast(struct, params, [:tags])
 
-    case changeset.valid? do
-      true ->
-        filters = params_to_filters(params)
-        from link in Link,
-          where: ^filters,
-          select: link,
-          preload: [:tags]
+    Enum.all?([filters_cs.valid?, tag_filters_cs.valid?])
+  end
 
-      false ->
-        from link in Link,
-          preload: [:tags]
+  defp link_query({filters, []}), do: from link in Link, where: ^filters, preload: [:tags]
+  defp link_query({filters, tag_filters}) when is_list(tag_filters) do
+    from q in link_query({filters,  []}),
+      distinct: q.id,
+      join: tag in assoc(q, :tags),
+      where: tag.name in ^tag_filters
+  end
+  defp link_query(params) do
+    if valid_filters?(params) do
+      params |> params_to_filters() |> link_query()
+    else
+      from link in Link, preload: [:tags]
     end
   end
 
@@ -162,8 +172,8 @@ defmodule Links.Entries do
     String.length(tag) <= 30 && Regex.match?(~r/^[a-z0-9]+(?:-[a-z0-9]+)*$/, tag)
   end
 
-  defp parse_tags(attrs) do
-    (attrs[:csv_tags] || attrs["csv_tags"] || "")
+  defp parse_tags(attrs, key \\ "csv_tags") do
+    (attrs[key] || attrs[String.to_existing_atom(key)] || "")
     |> String.split(",")
     |> Enum.map(&normalize_tag/1)
     |> Enum.reject(& &1 == "")

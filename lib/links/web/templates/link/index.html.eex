@@ -1,15 +1,13 @@
-<div class="ui top fixed menu toolbar">
-  <div class="ui container">
-    <div class="item">
-      <%= link "New", to: link_path(@conn, :new), class: "ui basic blue button" %>
-    </div>
-    <%= form_for @conn, link_path(@conn, :index), [as: :filters, method: :get], fn f -> %>
-      <%= checkbox f, :archived %>
-      <%= submit "Filter" %>
-    <% end %>
-    <div class="item">
-      <%= link "Clear filters", to: link_path(@conn, :index), class: "ui basic blue button" %>
-    </div>
+<div class="ui bottom fixed menu toolbar">
+  <div class="item">
+    <%= link "New", to: link_path(@conn, :new), class: "ui basic blue button" %>
+  </div>
+  <%= form_for @conn, link_path(@conn, :index), [as: :filters, method: :get], fn f -> %>
+    <%= checkbox f, :archived %>
+    <%= submit "Filter" %>
+  <% end %>
+  <div class="item">
+    <%= link "Clear filters", to: link_path(@conn, :index), class: "ui basic blue button" %>
   </div>
 </div>
 
@@ -20,7 +18,7 @@
   </div>
 <% end %>
 
-<div class="ui very relaxed list">
+<div class="ui very relaxed large list">
   <%= for link <- @links do %>
   <div class="item">
     <div class="right floated content">
@@ -47,7 +45,6 @@
         <% end %>
       </div>
 
-      <!-- TODO: properly format date -->
       Created <%= from_now(link.inserted_at) %> |
 
       <%= if Enum.empty? link.tags do %>
