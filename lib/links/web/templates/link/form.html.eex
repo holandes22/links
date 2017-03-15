@@ -1,10 +1,5 @@
-<%= form_for @changeset, @action, [class: "ui form"], fn f -> %>
+<%= form_for @changeset, @action, [class: "ui error form"], fn f -> %>
   <h4 class="ui dividing header"><%= @title %></h4>
-  <%= if @changeset.action do %>
-    <div class="ui error message">
-      <p>Oops, something went wrong! Please check the errors below.</p>
-    </div>
-  <% end %>
 
   <div class="inline field">
     <div class="ui checkbox">
@@ -14,26 +9,24 @@
     </div>
   </div>
 
-  <div class="field">
+  <div class="<%= if f.errors[:notes], do: "error" %> field" >
     <%= label f, :notes %>
-    <%= text_input f, :notes, class: "form-control" %>
+    <%= text_input f, :notes %>
     <%= error_tag f, :notes %>
   </div>
 
-  <div class="field">
+  <div class="<%= if f.errors[:link], do: "error" %> field" >
     <%= label f, :link %>
-    <%= text_input f, :link, class: "form-control" %>
+    <%= text_input f, :link %>
     <%= error_tag f, :link %>
   </div>
 
-  <div class="field">
+  <div class="<%= if f.errors[:tags], do: "error" %> field" >
     <%= label f, :tags %>
-    <%= text_input f, :csv_tags, class: "form-control", maxlength: 350 %>
+    <%= text_input f, :csv_tags, maxlength: 350 %>
     <%= error_tag f, :tags %>
   </div>
 
-  <div class="form-group">
-    <%= submit "Submit", class: "ui basic blue button" %>
-    <%= link "Cancel", to: link_path(@conn, :index), class: "ui basic button"%>
-  </div>
+  <%= submit "Submit", class: "ui basic blue button" %>
+  <%= link "Cancel", to: link_path(@conn, :index), class: "ui basic button"%>
 <% end %>
