@@ -11,6 +11,7 @@ defmodule Links.Entries.Link do
                  # delete_all behavior will only remove from the join table, and not the tags
                  # https://hexdocs.pm/ecto/Ecto.Schema.html#many_to_many/3-removing-data
                  on_delete: :delete_all
+    field :csv_tags, :string, virtual: true
 
     timestamps()
   end

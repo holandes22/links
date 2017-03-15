@@ -25,7 +25,7 @@
 
   <div class="form-group">
     <%= label f, :tags, class: "control-label" %>
-    <%= link_tags_input @changeset.data.tags %>
+    <%= text_input f, :csv_tags, class: "form-control" %>
     <%= error_tag f, :tags %>
   </div>
 

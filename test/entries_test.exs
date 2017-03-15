@@ -4,9 +4,9 @@ defmodule Links.EntriesTest do
   alias Links.Entries
   alias Links.Entries.Link
 
-  @create_attrs %{archived: true, link: "http://a.com", notes: "some notes", tags: "a-a,b-1,c"}
-  @update_attrs %{archived: false, link: "http://b.com", notes: "some updated notes", tags: "2,e"}
-  @invalid_attrs %{archived: nil, link: nil, notes: nil, tags: nil}
+  @create_attrs %{archived: true, link: "http://a.com", notes: "some notes", csv_tags: "a-a,b-1,c"}
+  @update_attrs %{archived: false, link: "http://b.com", notes: "some updated notes", csv_tags: "2,e"}
+  @invalid_attrs %{archived: nil, link: nil, notes: nil, csv_tags: nil}
 
 
   def fixture(:link, attrs \\ @create_attrs) do
@@ -74,6 +74,13 @@ defmodule Links.EntriesTest do
       assert [link: {"is an invalid URL", []}] = changeset.errors
     end
 
+  end
+
+  test "create_link/1 with more tags than allowed returns error changeset" do
+    csv_tags = 1..11 |> Enum.map(&Integer.to_string/1) |> Enum.join(",")
+    params =  Map.merge(@create_attrs, %{csv_tags: csv_tags})
+    assert {:error, %Ecto.Changeset{errors: [tags: {msg, _}]}} = Entries.create_link(params)
+    assert msg =~ "should have at most"
   end
 
   test "create_link/1 with invalid data returns error changeset" do

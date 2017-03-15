@@ -139,15 +139,15 @@ defmodule Links.Entries do
 
   defp link_changeset(%Link{} = link, attrs) do
     link
-    |> Repo.preload(:tags)
     |> cast(attrs, [:archived, :notes, :link])
-    |> validate_required([:archived, :link])
-    |> Validator.validate_url(:link)
     |> put_assoc(:tags, parse_tags(attrs))
+    |> validate_required([:archived, :link])
+    |> validate_length(:tags, max: 10)
+    |> Validator.validate_url(:link)
   end
 
   defp parse_tags(attrs) do
-    (attrs[:tags] || attrs["tags"] || "")
+    (attrs[:csv_tags] || attrs["csv_tags"] || "")
     |> String.split(",")
     |> Enum.map(&normalize_tag/1)
     |> Enum.reject(& &1 == "")
