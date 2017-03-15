@@ -138,12 +138,28 @@ defmodule Links.Entries do
   end
 
   defp link_changeset(%Link{} = link, attrs) do
-    link
-    |> cast(attrs, [:archived, :notes, :link])
-    |> put_assoc(:tags, parse_tags(attrs))
-    |> validate_required([:archived, :link])
-    |> validate_length(:tags, max: 10)
-    |> Validator.validate_url(:link)
+    changeset =
+      link
+      |> cast(attrs, [:archived, :notes, :link])
+      |> validate_required([:archived, :link])
+      |> Validator.validate_url(:link)
+
+    tags = parse_tags(attrs)
+
+    case Enum.all?(tags, &valid_tag?/1) do
+      true ->
+        changeset
+        |> put_assoc(:tags, insert_and_get_all(tags))
+        |> validate_length(:tags, max: 10)
+
+      false ->
+        add_error(changeset, :tags, "should only contain valid slugs (not exceeding %{count} chars)", [count: 30])
+    end
+
+  end
+
+  defp valid_tag?(tag) do
+    String.length(tag) <= 30 && Regex.match?(~r/^[a-z0-9]+(?:-[a-z0-9]+)*$/, tag)
   end
 
   defp parse_tags(attrs) do
@@ -151,7 +167,6 @@ defmodule Links.Entries do
     |> String.split(",")
     |> Enum.map(&normalize_tag/1)
     |> Enum.reject(& &1 == "")
-    |> insert_and_get_all()
   end
 
   defp normalize_tag(tag) do

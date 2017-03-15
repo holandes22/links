@@ -7,6 +7,7 @@ defmodule Links.EntriesTest do
   @create_attrs %{archived: true, link: "http://a.com", notes: "some notes", csv_tags: "a-a,b-1,c"}
   @update_attrs %{archived: false, link: "http://b.com", notes: "some updated notes", csv_tags: "2,e"}
   @invalid_attrs %{archived: nil, link: nil, notes: nil, csv_tags: nil}
+  @invalid_tags  [".a", "a-", "a_b", "#aa", "a.b", "a!", "a--b", "very-long-tag-about-functional-programming"]
 
 
   def fixture(:link, attrs \\ @create_attrs) do
@@ -76,11 +77,23 @@ defmodule Links.EntriesTest do
 
   end
 
-  test "create_link/1 with more tags than allowed returns error changeset" do
-    csv_tags = 1..11 |> Enum.map(&Integer.to_string/1) |> Enum.join(",")
-    params =  Map.merge(@create_attrs, %{csv_tags: csv_tags})
-    assert {:error, %Ecto.Changeset{errors: [tags: {msg, _}]}} = Entries.create_link(params)
-    assert msg =~ "should have at most"
+  describe "create_link/1 with invalid tags returns error changeset" do
+    for tag <- @invalid_tags do
+      @invalid_tag tag
+
+      test "if tag is #{tag}" do
+        params =  Map.merge(@create_attrs, %{csv_tags: @invalid_tag})
+        assert {:error, %Ecto.Changeset{errors: [tags: {msg, _}]}} = Entries.create_link(params)
+        assert msg =~ "should only contain valid slugs"
+      end
+    end
+
+    test "if more than 10 tags" do
+      csv_tags = 1..11 |> Enum.map(&Integer.to_string/1) |> Enum.join(",")
+      params =  Map.merge(@create_attrs, %{csv_tags: csv_tags})
+      assert {:error, %Ecto.Changeset{errors: [tags: {msg, _}]}} = Entries.create_link(params)
+      assert msg =~ "should have at most"
+    end
   end
 
   test "create_link/1 with invalid data returns error changeset" do
