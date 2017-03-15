@@ -1,6 +1,4 @@
-<h2>New Link</h2>
-
 <%= render "form.html", changeset: @changeset,
-                        action: link_path(@conn, :create) %>
+                        action: link_path(@conn, :create),
+                        conn: @conn, title: "New Link" %>
 
-<span><%= link "Back", to: link_path(@conn, :index) %></span>
