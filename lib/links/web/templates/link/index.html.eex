@@ -1,36 +1,45 @@
 <div class="ui bottom fixed menu toolbar">
   <div class="ui container">
     <div class="item">
-      <%= link "New", to: link_path(@conn, :new), class: "ui basic blue button" %>
+      <%= link to: link_path(@conn, :new), class: "ui basic violet large button" do %>
+        <i class="icon plus"></i>
+        New
+      <% end %>
     </div>
     <div class="item">
       <%= form_for @conn, link_path(@conn, :index), [as: :filters, method: :get, class: "ui form"], fn f -> %>
-        <div class="fields">
+        <div class="inline fields">
           <div class="field">
             <div class="ui input">
               <%= text_input f, :tags, [ placeholder: "Tags" ] %>
             </div>
           </div>
           <div class="field">
-            <div class="ui slider checkbox">
-              <%= checkbox f, :archived %>
-              <label>Archived?</label>
-            </div>
+            <div class="ui radio checkbox"><%= radio_button f, :archived, true %><label>Archived</label></div>
+            <div class="ui radio checkbox"><%= radio_button f, :archived, false %><label>Unarchived</label></div>
+            <div class="ui radio checkbox"><%= radio_button f, :archived, "all", checked: true %><label>All</label></div>
           </div>
         </div>
-        <%= submit "Filter", class: "ui basic button" %>
+        <%= submit class: "ui basic black button" do %>
+          <i class="icon filter"></i>
+          Filter
+        <% end %>
         <%= if @filters do %>
-          <%= link "Clear filters", to: link_path(@conn, :index), class: "ui basic blue button" %>
+          <%= link to: link_path(@conn, :index), class: "ui basic black button" do %>
+            <i class="icon remove"></i>
+            Remove filters
+          <% end %>
         <% end %>
       <% end %>
     </div>
   </div>
 </div>
 
-<%= if @filters do %>
-  <div>
-    Filtering by:
-    <%= Poison.encode!(@filters) %>
+<%= if @filters && @filters["tags"] != "" do %>
+  <div class="ui segment">
+    <%= for tag <- String.split(@filters["tags"], ",", trim: true) do %>
+      <a class="ui purple basic label"><%= tag %></a>
+    <% end %>
   </div>
 <% end %>
 

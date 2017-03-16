@@ -9,6 +9,45 @@ defmodule Links.Entries do
   alias Links.Entries.{Link, Tag}
   alias Links.Web.Validator
 
+  @filter_names ~w(archived)
+  @filter_types %{archived: :boolean, tags: :string}
+
+
+  defp filters(query, params, :fields) do
+    changeset = cast({%{}, @filter_types}, params, [:archived])
+
+    if changeset.valid? do
+      filters =
+        params
+        |> Enum.filter(fn({key, value}) -> Enum.member?(@filter_names, key) && value != "" end)
+        |> Enum.map(fn({key, value}) -> {String.to_existing_atom(key), value} end)
+      from(q in query, where: ^filters)
+    else
+      query
+    end
+  end
+  defp filters(query, params, :tags) do
+    changeset =
+      {%{}, @filter_types}
+      |> cast(params, [:tags])
+      |> validate_required([:tags])
+
+    if changeset.valid? do
+      tags = parse_tags(params, "tags")
+      from q in query,
+        join: tag in assoc(q, :tags),
+        where: tag.name in ^tags
+    else
+      query
+    end
+  end
+
+  defp link_query(params) do
+    from(link in Link, distinct: link.id, preload: [:tags])
+    |> filters(params, :fields)
+    |> filters(params, :tags)
+  end
+
   @doc """
   Returns the list of links.
 
@@ -18,48 +57,8 @@ defmodule Links.Entries do
       [%Link{}, ...]
 
   """
-  @filter_names ~w(archived)
-  @filter_types %{archived: :boolean, tags: :string}
-
-  def params_to_filters(params) do
-    filters =
-      params
-      |> Enum.filter(fn({key, value}) -> Enum.member?(@filter_names, key) && value != "" end)
-      |> Enum.map(fn({key, value}) -> {String.to_existing_atom(key), value} end)
-
-    tag_filters = parse_tags(params, "tags")
-
-    {filters, tag_filters}
-
-  end
-
-  defp valid_filters?(params) do
-    struct = {%{}, @filter_types}
-    filters_cs = cast(struct, params, [:archived])
-    tag_filters_cs = cast(struct, params, [:tags])
-
-    Enum.all?([filters_cs.valid?, tag_filters_cs.valid?])
-  end
-
-  defp link_query({filters, []}), do: from link in Link, where: ^filters, preload: [:tags]
-  defp link_query({filters, tag_filters}) when is_list(tag_filters) do
-    from q in link_query({filters,  []}),
-      distinct: q.id,
-      join: tag in assoc(q, :tags),
-      where: tag.name in ^tag_filters
-  end
-  defp link_query(params) do
-    if valid_filters?(params) do
-      params |> params_to_filters() |> link_query()
-    else
-      from link in Link, preload: [:tags]
-    end
-  end
-
   def list_links(params \\ %{}) do
-    params
-      |> link_query()
-      |> Repo.all()
+    params |> link_query() |> Repo.all()
   end
 
   @doc """

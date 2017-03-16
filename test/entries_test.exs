@@ -42,7 +42,7 @@ defmodule Links.EntriesTest do
     end
 
     test "list_links/1 filtering by archive=true", %{fixtures: [archived | _tl]} do
-      assert Entries.list_links(%{"archived" => "true", "aa" => 2}) == [archived]
+      assert Entries.list_links(%{"archived" => true, "aa" => 2}) == [archived]
     end
 
     test "list_links/1 filtering by archive=false", %{fixtures: [_hd | unarchived]} do
@@ -84,6 +84,15 @@ defmodule Links.EntriesTest do
       fixture(:link, Map.merge(@create_attrs, %{csv_tags: "d", archived: true}))
 
       assert length(Entries.list_links(%{"tags" => "a,b,c", "archived" => true})) == 1
+
+    end
+
+    test "returns all matching when others filters are invalid" do
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,b", archived: true}))
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "c", archived: false}))
+      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "d", archived: true}))
+
+      assert length(Entries.list_links(%{"tags" => "a,b", "archived" => "all"})) == 1
 
     end
 
