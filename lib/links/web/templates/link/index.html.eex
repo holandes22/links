@@ -17,7 +17,10 @@
           <div class="field">
             <div class="ui radio checkbox"><%= radio_button f, :archived, true %><label>Archived</label></div>
             <div class="ui radio checkbox"><%= radio_button f, :archived, false %><label>Unarchived</label></div>
-            <div class="ui radio checkbox"><%= radio_button f, :archived, "all", checked: true %><label>All</label></div>
+            <div class="ui radio checkbox">
+              <%= radio_button f, :archived, "all", checked: is_nil(@filters) or not Enum.member? ["true", "false"], @filters["archived"] %>
+              <label>All</label>
+            </div>
           </div>
         </div>
         <%= submit class: "ui basic black button" do %>

@@ -14,38 +14,37 @@ defmodule Links.Entries do
 
 
   defp filters(query, params, :fields) do
-    changeset = cast({%{}, @filter_types}, params, [:archived])
+    filters =
+      params
+      |> Enum.filter(fn({key, value}) -> Enum.member?(@filter_names, key) && value != "" end)
+      |> Enum.map(fn({key, value}) -> {String.to_existing_atom(key), value} end)
 
-    if changeset.valid? do
-      filters =
-        params
-        |> Enum.filter(fn({key, value}) -> Enum.member?(@filter_names, key) && value != "" end)
-        |> Enum.map(fn({key, value}) -> {String.to_existing_atom(key), value} end)
-      from(q in query, where: ^filters)
-    else
-      query
-    end
+    from(q in query, where: ^filters)
   end
   defp filters(query, params, :tags) do
-    changeset =
-      {%{}, @filter_types}
-      |> cast(params, [:tags])
-      |> validate_required([:tags])
+    tags = parse_tags(params, "tags")
+    from q in query,
+      join: tag in assoc(q, :tags),
+      where: tag.name in ^tags
+  end
+  defp filters(query, params) do
+    struct = {%{}, @filter_types}
+    changesets = [
+      {:fields, cast(struct, params, [:archived])},
+      {:tags, cast(struct, params, [:tags]) |> validate_required([:tags])}
+    ]
 
-    if changeset.valid? do
-      tags = parse_tags(params, "tags")
-      from q in query,
-        join: tag in assoc(q, :tags),
-        where: tag.name in ^tags
-    else
-      query
-    end
+    Enum.reduce(changesets, query, fn({key, changeset}, query) ->
+      if changeset.valid? do
+        filters(query, params, key)
+      else
+        query
+      end
+    end)
   end
 
   defp link_query(params) do
-    from(link in Link, distinct: link.id, preload: [:tags])
-    |> filters(params, :fields)
-    |> filters(params, :tags)
+    from(link in Link, distinct: link.id, preload: [:tags]) |> filters(params)
   end
 
   @doc """
