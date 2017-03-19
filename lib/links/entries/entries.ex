@@ -159,11 +159,22 @@ defmodule Links.Entries do
         changeset
         |> put_assoc(:tags, insert_and_get_all(tags))
         |> validate_length(:tags, max: 10)
+        |> put_csv_tags()
 
       false ->
         add_error(changeset, :tags, "should only contain valid slugs (not exceeding %{count} chars)", [count: 30])
     end
 
+  end
+
+  defp put_csv_tags(changeset) do
+    case changeset.data.tags do
+      %Ecto.Association.NotLoaded{} ->
+        changeset
+      tags ->
+        csv_tags = Enum.map(tags, & &1.name) |> Enum.join(",")
+        put_change(changeset, :csv_tags, csv_tags)
+    end
   end
 
   defp valid_tag?(tag) do
