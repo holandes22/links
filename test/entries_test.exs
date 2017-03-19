@@ -4,7 +4,7 @@ defmodule Links.EntriesTest do
   alias Links.Entries
   alias Links.Entries.Link
 
-  @create_attrs %{archived: true, link: "http://a.com", notes: "some notes", csv_tags: "a-a,b-1,c"}
+  @create_attrs %{archived: true, link: "http://a.com", notes: "some notes", csv_tags: "a-a,b-1,c", favorite: true}
   @update_attrs %{archived: false, link: "http://b.com", notes: "some updated notes", csv_tags: "2,e"}
   @invalid_attrs %{archived: nil, link: nil, notes: nil, csv_tags: nil}
   @invalid_tags  [".a", "a-", "a_b", "#aa", "a.b", "a!", "a--b", "very-long-tag-about-functional-programming"]
@@ -16,14 +16,19 @@ defmodule Links.EntriesTest do
   end
 
   def filter_fixtures(_) do
-    archived = fixture(:link, Map.merge(@create_attrs, %{archived: true}))
-    unarchived = fixture(:link, Map.merge(@create_attrs, %{archived: false}))
-    %{fixtures: [archived, unarchived]}
+    link1 = fixture(:link, Map.merge(@create_attrs, %{archived: true, favorite: true}))
+    link2 = fixture(:link, Map.merge(@create_attrs, %{archived: false, favorite: false}))
+    %{fixtures: [link1, link2]}
   end
 
   test "list_links/1 returns all links" do
     link = fixture(:link)
     assert Entries.list_links() == [link]
+  end
+
+  test "list_links/1 returns all links if params have invalid filter" do
+    %{fixtures: fixtures} = filter_fixtures(:ok)
+    assert Entries.list_links(%{"fake" => "1"}) == fixtures
   end
 
   describe "list_links/1 filtering by archived" do
@@ -32,13 +37,9 @@ defmodule Links.EntriesTest do
     for value <- [1, "aaa", "11", ""] do
       @value value
 
-      test "list_links/1 returns all links if filter #{value}", %{fixtures: fixtures} do
+      test "list_links/1 returns all links if filter is #{value}", %{fixtures: fixtures} do
         assert Entries.list_links(%{"archived" => @value}) == fixtures
       end
-    end
-
-    test "list_links/1 returns all links if params have invalid filter", %{fixtures: fixtures} do
-      assert Entries.list_links(%{"fake" => "1"}) == fixtures
     end
 
     test "list_links/1 filtering by archive=true", %{fixtures: [archived | _tl]} do
@@ -46,7 +47,28 @@ defmodule Links.EntriesTest do
     end
 
     test "list_links/1 filtering by archive=false", %{fixtures: [_hd | unarchived]} do
-      assert Entries.list_links(%{"archived" => false}) == unarchived
+      assert Entries.list_links(%{"archived" => "false"}) == unarchived
+    end
+
+  end
+
+  describe "list_links/1 filtering by favorite" do
+    setup [:filter_fixtures]
+
+    for value <- [1, "aaa", "11", ""] do
+      @value value
+
+      test "list_links/1 returns all links if filter is #{value}", %{fixtures: fixtures} do
+        assert Entries.list_links(%{"favorite" => @value}) == fixtures
+      end
+    end
+
+    test "list_links/1 filtering by favorite=true", %{fixtures: [fav | _tl]} do
+      assert Entries.list_links(%{"favorite" => "true", "aa" => 2}) == [fav]
+    end
+
+    test "list_links/1 filtering by favorite=false", %{fixtures: [_hd | not_fav]} do
+      assert Entries.list_links(%{"favorite" => false, "archived" => false}) == not_fav
     end
 
   end
@@ -107,6 +129,7 @@ defmodule Links.EntriesTest do
     assert {:ok, %Link{} = link} = Entries.create_link(@create_attrs)
 
     assert link.archived == true
+    assert link.favorite == true
     assert link.link == @create_attrs.link
     assert link.notes == "some notes"
     assert Enum.map(link.tags, (& &1.name)) == ~w(a-a b-1 c)

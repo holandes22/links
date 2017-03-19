@@ -9,8 +9,8 @@ defmodule Links.Entries do
   alias Links.Entries.{Link, Tag}
   alias Links.Web.Validator
 
-  @filter_names ~w(archived)
-  @filter_types %{archived: :boolean, tags: :string}
+  @filter_names ~w(archived favorite)
+  @filter_types %{archived: :boolean, favorite: :boolean, tags: :string}
 
 
   defp filters(query, params, :fields) do
@@ -30,7 +30,7 @@ defmodule Links.Entries do
   defp filters(query, params) do
     struct = {%{}, @filter_types}
     changesets = [
-      {:fields, cast(struct, params, [:archived])},
+      {:fields, cast(struct, params, [:archived, :favorite])},
       {:tags, cast(struct, params, [:tags]) |> validate_required([:tags])}
     ]
 
@@ -148,8 +148,8 @@ defmodule Links.Entries do
   defp link_changeset(%Link{} = link, attrs) do
     changeset =
       link
-      |> cast(attrs, [:archived, :notes, :link])
-      |> validate_required([:archived, :link])
+      |> cast(attrs, [:archived, :favorite, :notes, :link])
+      |> validate_required([:link])
       |> Validator.validate_url(:link)
 
     tags = parse_tags(attrs)

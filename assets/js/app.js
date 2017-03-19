@@ -25,3 +25,6 @@ $(".message .close")
   .on("click", function() {
     $(this).parent(".message").fadeOut();
   });
+
+
+$(".filters.button").popup({ popup: ".filters.popup", on: "click" });

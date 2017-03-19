@@ -1,11 +1,21 @@
 <%= form_for @changeset, @action, [class: "ui error form"], fn f -> %>
   <h4 class="ui dividing header"><%= @title %></h4>
 
-  <div class="inline field">
-    <div class="ui checkbox">
-      <%= checkbox f, :archived, class: "checkbox" %>
-      <%= label f, "Archived?" %>
-      <%= error_tag f, :archived %>
+  <div class="fields">
+    <div class="inline field">
+      <div class="ui checkbox">
+        <%= checkbox f, :archived, class: "checkbox" %>
+        <%= label f, "Archived?" %>
+        <%= error_tag f, :archived %>
+      </div>
+    </div>
+
+    <div class="inline field">
+      <div class="ui checkbox">
+        <%= checkbox f, :favorite, class: "checkbox" %>
+        <%= label f, "Favorite?" %>
+        <%= error_tag f, :favorite %>
+      </div>
     </div>
   </div>
 
@@ -27,6 +37,6 @@
     <%= error_tag f, :tags %>
   </div>
 
-  <%= submit "Submit", class: "ui basic blue button" %>
-  <%= link "Cancel", to: link_path(@conn, :index), class: "ui basic button"%>
+  <%= submit "Submit", class: "ui basic violet button" %>
+  <%= link "Cancel", to: link_path(@conn, :index), class: "ui basic black button"%>
 <% end %>

@@ -12,6 +12,7 @@ defmodule Links.Entries.Link do
                  # https://hexdocs.pm/ecto/Ecto.Schema.html#many_to_many/3-removing-data
                  on_delete: :delete_all
     field :csv_tags, :string, virtual: true
+    field :favorite, :boolean, default: false
 
     timestamps()
   end

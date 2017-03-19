@@ -7,35 +7,53 @@
       <% end %>
     </div>
     <div class="item">
-      <%= form_for @conn, link_path(@conn, :index), [as: :filters, method: :get, class: "ui form"], fn f -> %>
-        <div class="inline fields">
-          <div class="field">
-            <div class="ui input">
-              <%= text_input f, :tags, [ placeholder: "Tags" ] %>
-            </div>
-          </div>
-          <div class="field">
-            <div class="ui radio checkbox"><%= radio_button f, :archived, true %><label>Archived</label></div>
-            <div class="ui radio checkbox"><%= radio_button f, :archived, false %><label>Unarchived</label></div>
-            <div class="ui radio checkbox">
-              <%= radio_button f, :archived, "all", checked: is_nil(@filters) or not Enum.member? ["true", "false"], @filters["archived"] %>
-              <label>All</label>
-            </div>
-          </div>
-        </div>
-        <%= submit class: "ui basic black button" do %>
-          <i class="icon filter"></i>
-          Filter
-        <% end %>
-        <%= if @filters do %>
-          <%= link to: link_path(@conn, :index), class: "ui basic black button" do %>
-            <i class="icon remove"></i>
-            Remove filters
-          <% end %>
-        <% end %>
-      <% end %>
+      <div class="ui basic large filters black button">
+        <i class="icon filter"></i>
+        Filters
+      </div>
     </div>
   </div>
+</div>
+
+
+<div class="ui fluid filters popup bottom left transition hidden">
+  <%= form_for @conn, link_path(@conn, :index), [as: :filters, method: :get, class: "ui form"], fn f -> %>
+    <div class="inline fields">
+      <div class="field">
+        <label>Tags</label>
+        <div class="ui input">
+          <%= text_input f, :tags, [ placeholder: "Tags" ] %>
+        </div>
+      </div>
+      <div class="field">
+        <label>Archived?</label>
+        <div class="ui radio checkbox"><%= radio_button f, :archived, true %><label>Yes</label></div>
+        <div class="ui radio checkbox"><%= radio_button f, :archived, false %><label>No</label></div>
+        <div class="ui radio checkbox">
+          <input type="radio" checked="<%= if (is_nil(@filters) or not Enum.member? ["true", "false"], @filters["archived"]), do: "checked", else: "" %>">
+          <label>All</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Favorite?</label>
+        <div class="ui radio checkbox"><%= radio_button f, :favorite, true %><label>Yes</label></div>
+        <div class="ui radio checkbox"><%= radio_button f, :favorite, false %><label>No</label></div>
+        <div class="ui radio checkbox">
+          <input type="radio" checked="<%= if (is_nil(@filters) or not Enum.member? ["true", "false"], @filters["favorite"]), do: "checked", else: "" %>">
+          <label>All</label>
+        </div>
+      </div>
+    </div>
+    <%= submit class: "ui basic black button" do %>
+      Apply
+    <% end %>
+    <%= if @filters do %>
+      <%= link to: link_path(@conn, :index), class: "ui basic black button" do %>
+        <i class="icon remove"></i>
+        Clear filters
+      <% end %>
+    <% end %>
+  <% end %>
 </div>
 
 <%= if @filters && @filters["tags"] != "" do %>
@@ -72,6 +90,12 @@
           No description
         <% end %>
       </div>
+
+      <%= if link.favorite do %>
+        <i class="star icon yellow"></i>
+      <% else %>
+        <i class="empty star icon"></i>
+      <% end %> |
 
       Created <%= from_now(link.inserted_at) %> |
 
