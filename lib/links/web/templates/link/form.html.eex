@@ -1,8 +1,8 @@
 <%= form_for @changeset, @action, [class: "ui error form"], fn f -> %>
   <h4 class="ui dividing header"><%= @title %></h4>
 
-  <div class="fields">
-    <div class="inline field">
+  <div class="inline fields">
+    <div class="field">
       <div class="ui checkbox">
         <%= checkbox f, :archived, class: "checkbox" %>
         <%= label f, "Archived?" %>
@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    <div class="inline field">
+    <div class="field">
       <div class="ui checkbox">
         <%= checkbox f, :favorite, class: "checkbox" %>
         <%= label f, "Favorite?" %>
