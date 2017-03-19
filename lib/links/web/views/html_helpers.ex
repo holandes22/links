@@ -14,4 +14,15 @@ defmodule Links.Web.HtmlHelpers do
     """ |> raw
   end
 
+  def bool_to_string(value) do
+    case value do
+      true    -> "Yes"
+      false   -> "No"
+      "true"  -> "Yes"
+      "false" -> "No"
+      _       -> "All"
+    end
+
+  end
+
 end

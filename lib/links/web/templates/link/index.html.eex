@@ -30,7 +30,11 @@
         <div class="ui radio checkbox"><%= radio_button f, :archived, true %><label>Yes</label></div>
         <div class="ui radio checkbox"><%= radio_button f, :archived, false %><label>No</label></div>
         <div class="ui radio checkbox">
-          <input type="radio" checked="<%= if (is_nil(@filters) or not Enum.member? ["true", "false"], @filters["archived"]), do: "checked", else: "" %>">
+          <%= if is_nil(@filters) or not Enum.member? ["true", "false"], @filters["archived"] do %>
+            <input type="radio" checked="checked" name="filters[archived]" value="all">
+          <% else %>
+            <input type="radio" name="filters[archived]">
+          <% end %>
           <label>All</label>
         </div>
       </div>
@@ -39,7 +43,11 @@
         <div class="ui radio checkbox"><%= radio_button f, :favorite, true %><label>Yes</label></div>
         <div class="ui radio checkbox"><%= radio_button f, :favorite, false %><label>No</label></div>
         <div class="ui radio checkbox">
-          <input type="radio" checked="<%= if (is_nil(@filters) or not Enum.member? ["true", "false"], @filters["favorite"]), do: "checked", else: "" %>">
+          <%= if is_nil(@filters) or not Enum.member? ["true", "false"], @filters["favorite"] do %>
+            <input type="radio" checked="checked" name="filters[favorite]" value="all">
+          <% else %>
+            <input type="radio" name="filters[favorite]">
+          <% end %>
           <label>All</label>
         </div>
       </div>
@@ -47,21 +55,39 @@
     <%= submit class: "ui basic black button" do %>
       Apply
     <% end %>
-    <%= if @filters do %>
-      <%= link to: link_path(@conn, :index), class: "ui basic black button" do %>
-        <i class="icon remove"></i>
-        Clear filters
-      <% end %>
-    <% end %>
   <% end %>
 </div>
 
-<%= if @filters && @filters["tags"] != "" do %>
-  <div class="ui segment">
-    <%= for tag <- String.split(@filters["tags"], ",", trim: true) do %>
-      <a class="ui purple basic label"><%= tag %></a>
-    <% end %>
+<%= if @filters do %>
+<div class="ui clearing segment">
+  <%= link to: link_path(@conn, :index), class: "ui right floated basic black small button" do %>
+    <i class="icon remove"></i>
+    Clear filters
+  <% end %>
+  <div class="ui two column relaxed equal height divided grid">
+    <div class="column">
+      <h5 class="ui header">Filters</h5>
+      <div class="ui basic label">
+        <i class="archive icon"></i>
+        Archived?
+        <div class="detail"> <%= bool_to_string @filters["archived"] %></div>
+      </div>
+      <div class="ui basic label">
+        <i class="star icon"></i>
+        Favorite?
+        <div class="detail"> <%= bool_to_string @filters["favorite"] %></div>
+      </div>
+    </div>
+    <%= if @filters["tags"] != "" do %>
+    <div class="column">
+      <h5 class="ui header">Tag filters</h5>
+      <%= for tag <- String.split(@filters["tags"], ",", trim: true) do %>
+        <a class="ui purple basic label"><%= tag %></a>
+      <% end %>
+    </div>
+  <% end %>
   </div>
+</div>
 <% end %>
 
 <div class="ui very relaxed large list">
@@ -84,11 +110,7 @@
       <a href="<%= link.link %>" target="_blank" class="header"><%= link.link %></a>
 
       <div class="description">
-        <%= if link.notes != "" do %>
-          <%= link.notes %>
-        <% else %>
-          No description
-        <% end %>
+        <%= link.notes %>
       </div>
 
       <%= if link.favorite do %>
