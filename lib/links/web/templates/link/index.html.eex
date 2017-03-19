@@ -94,16 +94,13 @@
   <%= for link <- @links do %>
   <div class="item">
     <div class="right floated content">
-      <div class="ui icon basic button">
-        <%= link to: link_path(@conn, :delete, link),
-            method: :delete, data: [confirm: "Are you sure?"] do %>
-          <i class="trash icon"></i>
-        <% end %>
+      <div class="ui icon red delete-modal button" onClick="window.Links.openModal(<%= link.id %>);">
+        <i class="trash icon"></i>
       </div>
 
-      <a href="<%= link_path(@conn, :edit, link) %>" class="ui icon basic button">
+      <%= link to: link_path(@conn, :edit, link), class: "ui icon blue button" do %>
         <i class="edit icon"></i>
-      </a>
+      <% end %>
     </div>
     <i class="<%= if link.archived, do: "archive", else: "linkify" %> large icon"></i>
     <div class="content">
@@ -131,5 +128,29 @@
 
     </div>
   </div>
+
+  <!-- TODO: this is awful, we are creating n modal dialogs -->
+  <div id="delete_link_modal_<%= link.id %>" class="ui basic modal">
+    <div class="header">Remove link</div>
+    <div class="content">
+      <p>Are you sure to delete <%= link.link %>?</p>
+    </div>
+    <div class="actions">
+      <div class="ui grid">
+        <div class="eight wide column">
+          <%= link to: link_path(@conn, :delete, link), method: :delete, class: "ui basic red inverted fluid button" do %>
+            <i class="remove icon"></i>
+            Delete
+          <% end %>
+        </div>
+        <div class="eight wide column">
+          <div class="ui cancel basic inverted green fluid button">Cancel</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <% end %>
 </div>
+
+
