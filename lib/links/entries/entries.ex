@@ -9,18 +9,9 @@ defmodule Links.Entries do
   alias Links.Entries.{Link, Tag}
   alias Links.Web.Validator
 
-  @filter_names ~w(archived favorite)
   @filter_types %{archived: :boolean, favorite: :boolean, tags: :string}
 
 
-  defp filters(query, params, :fields) do
-    filters =
-      params
-      |> Enum.filter(fn({key, value}) -> Enum.member?(@filter_names, key) && value != "" end)
-      |> Enum.map(fn({key, value}) -> {String.to_existing_atom(key), value} end)
-
-    from(link in query, where: ^filters)
-  end
   defp filters(query, params, :tags) do
     tags = parse_tags(params, "tags")
 
@@ -35,16 +26,26 @@ defmodule Links.Entries do
       where: fragment("? <@ ?", ^tags, sq.tag_names),
       select: link
   end
+  defp filters(query, params, field_name) do
+    case params[Atom.to_string(field_name)] do
+      nil ->
+        query
+      value ->
+        filters =  [{field_name, value}]
+        from(link in query, where: ^filters)
+    end
+  end
   defp filters(query, params) do
     struct = {%{}, @filter_types}
     changesets = [
-      {:fields, cast(struct, params, [:archived, :favorite])},
+      {:archived, cast(struct, params, [:archived]) |> validate_required(:archived)},
+      {:favorite, cast(struct, params, [:favorite]) |> validate_required(:favorite)},
       {:tags, cast(struct, params, [:tags]) |> validate_required([:tags])}
     ]
 
-    Enum.reduce(changesets, query, fn({key, changeset}, query) ->
+    Enum.reduce(changesets, query, fn({field_name, changeset}, query) ->
       if changeset.valid? do
-        filters(query, params, key)
+        filters(query, params, field_name)
       else
         query
       end

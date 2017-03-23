@@ -50,6 +50,10 @@ defmodule Links.EntriesTest do
       assert Entries.list_links(%{"archived" => "false"}) == unarchived
     end
 
+    test "list_links/1 returns disregards other invalid filters", %{fixtures: [archived | _tl]} do
+      assert Entries.list_links(%{"archived" => true, "favorite" => "invalid"}) == [archived]
+    end
+
   end
 
   describe "list_links/1 filtering by favorite" do
