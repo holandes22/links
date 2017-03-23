@@ -94,7 +94,7 @@
   <%= for link <- @links do %>
   <div class="item">
     <div class="right floated content">
-      <div class="ui icon red delete-modal button" onClick="window.Links.openModal(<%= link.id %>);">
+      <div class="ui icon red button" onClick="window.Links.openModal(<%= link.id %>);">
         <i class="trash icon"></i>
       </div>
 

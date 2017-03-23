@@ -19,13 +19,21 @@ defmodule Links.Entries do
       |> Enum.filter(fn({key, value}) -> Enum.member?(@filter_names, key) && value != "" end)
       |> Enum.map(fn({key, value}) -> {String.to_existing_atom(key), value} end)
 
-    from(q in query, where: ^filters)
+    from(link in query, where: ^filters)
   end
   defp filters(query, params, :tags) do
     tags = parse_tags(params, "tags")
-    from q in query,
-      join: tag in assoc(q, :tags),
-      where: tag.name in ^tags
+
+    squery =
+      from link in query,
+        join: tag in assoc(link, :tags),
+        group_by: link.id,
+        select: %{id: link.id, tag_names: fragment("array_agg(?)", tag.name)}
+
+    from sq in subquery(squery),
+      join: link in Link, on: link.id == sq.id,
+      where: fragment("? <@ ?", ^tags, sq.tag_names),
+      select: link
   end
   defp filters(query, params) do
     struct = {%{}, @filter_types}
@@ -44,7 +52,8 @@ defmodule Links.Entries do
   end
 
   defp link_query(params) do
-    from(link in Link, distinct: link.id, preload: [:tags]) |> filters(params)
+    q = from(link in Link) |> filters(params)
+    from(link in subquery(q), distinct: link.id, preload: [:tags])
   end
 
   @doc """
