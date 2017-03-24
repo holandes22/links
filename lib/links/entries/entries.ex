@@ -15,16 +15,10 @@ defmodule Links.Entries do
   defp filters(query, params, :tags) do
     tags = parse_tags(params, "tags")
 
-    squery =
-      from link in query,
-        join: tag in assoc(link, :tags),
-        group_by: link.id,
-        select: %{id: link.id, tag_names: fragment("array_agg(?)", tag.name)}
-
-    from sq in subquery(squery),
-      join: link in Link, on: link.id == sq.id,
-      where: fragment("? <@ ?", ^tags, sq.tag_names),
-      select: link
+    from link in query,
+      join: tag in assoc(link, :tags),
+      group_by: link.id,
+      having: fragment("? <@ array_agg(?)", ^tags, tag.name)
   end
   defp filters(query, params, field_name) do
     case params[Atom.to_string(field_name)] do
@@ -53,8 +47,7 @@ defmodule Links.Entries do
   end
 
   defp link_query(params) do
-    q = from(link in Link) |> filters(params)
-    from(link in subquery(q), distinct: link.id, preload: [:tags])
+    from(link in Link, distinct: link.id, preload: [:tags]) |> filters(params)
   end
 
   @doc """
