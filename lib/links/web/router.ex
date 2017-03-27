@@ -8,6 +8,7 @@ defmodule Links.Web.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug Links.Web.StoreFiltersPlug
+    plug Links.Web.RedirectPlug
   end
 
   pipeline :api do

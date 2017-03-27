@@ -28,7 +28,7 @@ defmodule Links.Web.LinkController do
       {:ok, _link} ->
         conn
         |> put_flash(:info, "Link created successfully.")
-        |> redirect(to: link_path(conn, :index, %{filters: conn.assigns.filters}))
+        |> redirect(to: link_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
@@ -47,7 +47,7 @@ defmodule Links.Web.LinkController do
       {:ok, _link} ->
         conn
         |> put_flash(:info, "Link updated successfully.")
-        |> redirect(to: link_path(conn, :index, %{filters: conn.assigns.filters}))
+        |> redirect(to: link_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", link: link, changeset: changeset)
     end
@@ -59,6 +59,6 @@ defmodule Links.Web.LinkController do
 
     conn
     |> put_flash(:info, "Link deleted successfully.")
-    |> redirect(to: link_path(conn, :index, %{filters: conn.assigns.filters}))
+    |> redirect(to: link_path(conn, :index))
   end
 end
