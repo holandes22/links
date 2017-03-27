@@ -7,6 +7,7 @@ defmodule Links.Web.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug Links.Web.StoreFiltersPlug
   end
 
   pipeline :api do
@@ -17,6 +18,7 @@ defmodule Links.Web.Router do
     pipe_through :browser
 
     resources "/", LinkController, except: [:show]
+    get "/clear-filters", LinkController, :clear_filters
   end
 
 end

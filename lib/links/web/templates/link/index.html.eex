@@ -22,20 +22,20 @@
       <div class="field">
         <label>Tags</label>
         <div class="ui input">
-          <%= text_input f, :tags, [ placeholder: "Tags" ] %>
+          <%= text_input f, :tags, placeholder: "Tags", value: @filters["tags"] %>
         </div>
       </div>
       <div class="field">
         <label>Archived?</label>
-        <div class="ui radio checkbox"><%= radio_button f, :archived, true %><label>Yes</label></div>
-        <div class="ui radio checkbox"><%= radio_button f, :archived, false %><label>No</label></div>
-        <div class="ui radio checkbox"><%= radio_button f, :archived, "all" %><label>All</label></div>
+        <div class="ui radio checkbox"><%= radio_button f, :archived, true, checked: @filters["archived"] == "true" %><label>Yes</label></div>
+        <div class="ui radio checkbox"><%= radio_button f, :archived, false, checked: @filters["archived"] == "false"  %><label>No</label></div>
+        <div class="ui radio checkbox"><%= radio_button f, :archived, "all", checked: not Enum.member?(["true", "false"], @filters["archived"]) %><label>All</label></div>
       </div>
       <div class="field">
         <label>Favorite?</label>
-        <div class="ui radio checkbox"><%= radio_button f, :favorite, true %><label>Yes</label></div>
-        <div class="ui radio checkbox"><%= radio_button f, :favorite, false %><label>No</label></div>
-        <div class="ui radio checkbox"><%= radio_button f, :favorite, "all" %><label>All</label></div>
+        <div class="ui radio checkbox"><%= radio_button f, :favorite, true, checked: @filters["favorite"] == "true"  %><label>Yes</label></div>
+        <div class="ui radio checkbox"><%= radio_button f, :favorite, false, checked: @filters["favorite"] == "false" %><label>No</label></div>
+        <div class="ui radio checkbox"><%= radio_button f, :favorite, "all", checked: not Enum.member?(["true", "false"], @filters["favorite"]) %><label>All</label></div>
       </div>
     </div>
     <%= submit class: "ui basic black button" do %>
@@ -46,7 +46,7 @@
 
 <%= if @filters do %>
 <div class="ui clearing segment">
-  <%= link to: link_path(@conn, :index), class: "ui right floated basic black small button" do %>
+  <%= link to: link_path(@conn, :clear_filters), class: "ui right floated basic black small button" do %>
     <i class="icon remove"></i>
     Clear filters
   <% end %>

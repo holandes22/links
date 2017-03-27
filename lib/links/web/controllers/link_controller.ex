@@ -3,13 +3,19 @@ defmodule Links.Web.LinkController do
 
   alias Links.Entries
 
-  def index(conn, %{"filters" => filters}) do
+  def index(%Plug.Conn{assigns: %{filters: filters}} = conn, _params) when filters == %{} do
+    links = Entries.list_links()
+    render(conn, "index.html", links: links, filters: nil)
+  end
+  def index(%Plug.Conn{assigns: %{filters: filters}} = conn, _params) do
     links = Entries.list_links(filters)
     render(conn, "index.html", %{links: links, filters: filters})
   end
-  def index(conn, _params) do
-    links = Entries.list_links()
-    render(conn, "index.html", links: links, filters: nil)
+
+  def clear_filters(conn, _params) do
+    conn
+    |> put_session(:filters, "{}")
+    |> redirect(to: link_path(conn, :index))
   end
 
   def new(conn, _params) do
@@ -22,7 +28,7 @@ defmodule Links.Web.LinkController do
       {:ok, _link} ->
         conn
         |> put_flash(:info, "Link created successfully.")
-        |> redirect(to: link_path(conn, :index))
+        |> redirect(to: link_path(conn, :index, %{filters: conn.assigns.filters}))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
@@ -41,7 +47,7 @@ defmodule Links.Web.LinkController do
       {:ok, _link} ->
         conn
         |> put_flash(:info, "Link updated successfully.")
-        |> redirect(to: link_path(conn, :index))
+        |> redirect(to: link_path(conn, :index, %{filters: conn.assigns.filters}))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", link: link, changeset: changeset)
     end
@@ -53,6 +59,6 @@ defmodule Links.Web.LinkController do
 
     conn
     |> put_flash(:info, "Link deleted successfully.")
-    |> redirect(to: link_path(conn, :index))
+    |> redirect(to: link_path(conn, :index, %{filters: conn.assigns.filters}))
   end
 end
