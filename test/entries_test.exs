@@ -8,10 +8,13 @@ defmodule Links.EntriesTest do
   @update_attrs %{archived: false, link: "http://b.com", notes: "some updated notes", csv_tags: "2,e"}
   @invalid_attrs %{archived: nil, link: nil, notes: nil, csv_tags: nil}
   @invalid_tags  [".a", "a-", "a_b", "#aa", "a.b", "a!", "a--b", "very-long-tag-about-functional-programming"]
-
+  @user_attrs %{email: "fake@email.com"}
 
   def fixture(:link, attrs \\ @create_attrs) do
-    {:ok, link} = Entries.create_link(attrs)
+    {:ok, link} =
+      @user_attrs
+      |> Entries.get_or_create_user()
+      |> Entries.create_link(attrs)
     link
   end
 
@@ -130,7 +133,8 @@ defmodule Links.EntriesTest do
   end
 
   test "create_link/1 with valid data creates a link" do
-    assert {:ok, %Link{} = link} = Entries.create_link(@create_attrs)
+    user = Entries.get_or_create_user(@user_attrs)
+    assert {:ok, %Link{} = link} = Entries.create_link(user, @create_attrs)
 
     assert link.archived == true
     assert link.favorite == true
@@ -144,7 +148,8 @@ defmodule Links.EntriesTest do
 
     for url <- invalid_urls do
       params =  Map.merge(@create_attrs, %{link: url})
-      assert {:error, %Ecto.Changeset{} = changeset} = Entries.create_link(params)
+      user = Entries.get_or_create_user(@user_attrs)
+      assert {:error, %Ecto.Changeset{} = changeset} = Entries.create_link(user, params)
       refute changeset.valid?
       assert [link: {"is an invalid URL", []}] = changeset.errors
     end
@@ -157,7 +162,8 @@ defmodule Links.EntriesTest do
 
       test "if tag is #{tag}" do
         params =  Map.merge(@create_attrs, %{csv_tags: @invalid_tag})
-        assert {:error, %Ecto.Changeset{errors: [tags: {msg, _}]}} = Entries.create_link(params)
+        user = Entries.get_or_create_user(@user_attrs)
+        assert {:error, %Ecto.Changeset{errors: [tags: {msg, _}]}} = Entries.create_link(user, params)
         assert msg =~ "should only contain valid slugs"
       end
     end
@@ -165,13 +171,15 @@ defmodule Links.EntriesTest do
     test "if more than 10 tags" do
       csv_tags = 1..11 |> Enum.map(&Integer.to_string/1) |> Enum.join(",")
       params =  Map.merge(@create_attrs, %{csv_tags: csv_tags})
-      assert {:error, %Ecto.Changeset{errors: [tags: {msg, _}]}} = Entries.create_link(params)
+      user = Entries.get_or_create_user(@user_attrs)
+      assert {:error, %Ecto.Changeset{errors: [tags: {msg, _}]}} = Entries.create_link(user, params)
       assert msg =~ "should have at most"
     end
   end
 
   test "create_link/1 with invalid data returns error changeset" do
-    assert {:error, %Ecto.Changeset{}} = Entries.create_link(@invalid_attrs)
+    user = Entries.get_or_create_user(@user_attrs)
+    assert {:error, %Ecto.Changeset{}} = Entries.create_link(user, @invalid_attrs)
   end
 
   test "update_link/2 with valid data updates the link" do

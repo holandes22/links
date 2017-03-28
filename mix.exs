@@ -38,6 +38,7 @@ defmodule Links.Mixfile do
      {:gettext, "~> 0.11"},
      {:timex, "~> 3.1.13"},
      {:ex_machina, "~> 2.0", only: [:test, :dev]},
+     {:oauth2, "~> 0.9"},
      {:cowboy, "~> 1.0"}]
   end
 

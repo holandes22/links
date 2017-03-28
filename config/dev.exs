@@ -55,3 +55,5 @@ config :links, Links.Repo,
   database: "links_dev",
   hostname: "localhost",
   pool_size: 10
+
+config :oauth2, debug: true
