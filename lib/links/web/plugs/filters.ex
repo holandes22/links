@@ -1,4 +1,4 @@
-defmodule Links.Web.StoreFiltersPlug do
+defmodule Links.Web.Plugs.StoreFiltersInSession do
   import Plug.Conn
 
   def init(opts), do: opts

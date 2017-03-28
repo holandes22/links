@@ -1,4 +1,4 @@
-defmodule Links.Web.RedirectPlug do
+defmodule Links.Web.Plugs.RedirectIfFilters do
   import Plug.Conn
   alias Links.Web.Router.Helpers
 
