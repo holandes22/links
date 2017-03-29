@@ -42,18 +42,19 @@ defmodule Links.Entries do
     end)
   end
 
-  defp link_query(params) do
-    from(link in Link, distinct: link.id, preload: [:tags]) |> filters(params)
+  defp link_query(filters) do
+    from(link in Link, distinct: link.id, preload: [:tags]) |> filters(filters)
   end
 
-  def list_links(params \\ %{}) do
-    params
-    |> link_query()
-    |> Repo.all()
+  def list_links(), do: list_links([filters: %{}])
+  def list_links([filters: filters]), do: filters |> link_query() |> Repo.all()
+  def list_links(user_id, opts \\ []) do
+    filters = Keyword.get(opts, :filters, %{})
+    from(link in link_query(filters), where: [user_id: ^user_id]) |> Repo.all()
   end
 
-  def get_link!(id) do
-    Link
+  def get_link!(id, user_id) do
+    from(link in Link, where: [user_id: ^user_id])
     |> Repo.get!(id)
     |> Repo.preload(:tags)
   end

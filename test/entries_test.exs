@@ -10,17 +10,16 @@ defmodule Links.EntriesTest do
   @invalid_tags  [".a", "a-", "a_b", "#aa", "a.b", "a!", "a--b", "very-long-tag-about-functional-programming"]
   @user_attrs %{email: "fake@email.com"}
 
-  def fixture(:link, attrs \\ @create_attrs) do
-    {:ok, link} =
-      @user_attrs
-      |> Entries.get_or_create_user()
-      |> Entries.create_link(attrs)
+  def fixture(:link, opts \\ []) do
+    attrs = Keyword.get(opts, :attrs, @create_attrs)
+    user = Keyword.get(opts, :user) || Entries.get_or_create_user(@user_attrs)
+    {:ok, link} = Entries.create_link(user, attrs)
     link
   end
 
   def filter_fixtures(_) do
-    link1 = fixture(:link, Map.merge(@create_attrs, %{archived: true, favorite: true}))
-    link2 = fixture(:link, Map.merge(@create_attrs, %{archived: false, favorite: false}))
+    link1 = fixture(:link, attrs: Map.merge(@create_attrs, %{archived: true, favorite: true}))
+    link2 = fixture(:link, attrs: Map.merge(@create_attrs, %{archived: false, favorite: false}))
     %{fixtures: [link1, link2]}
   end
 
@@ -29,9 +28,16 @@ defmodule Links.EntriesTest do
     assert Entries.list_links() == [link]
   end
 
+  test "list_links/2 returns all links from the user" do
+    user = Entries.create_user!(%{email: "second.user@mail.com"})
+    link = fixture(:link)
+    fixture(:link, user: user)
+    assert Entries.list_links(link.user_id) == [link]
+  end
+
   test "list_links/1 returns all links if params have invalid filter" do
     %{fixtures: fixtures} = filter_fixtures(:ok)
-    assert Entries.list_links(%{"fake" => "1"}) == fixtures
+    assert Entries.list_links(filters: %{"fake" => "1"}) == fixtures
   end
 
   describe "list_links/1 filtering by archived" do
@@ -41,20 +47,20 @@ defmodule Links.EntriesTest do
       @value value
 
       test "list_links/1 returns all links if filter is #{value}", %{fixtures: fixtures} do
-        assert Entries.list_links(%{"archived" => @value}) == fixtures
+        assert Entries.list_links(filters: %{"archived" => @value}) == fixtures
       end
     end
 
     test "list_links/1 filtering by archive=true", %{fixtures: [archived | _tl]} do
-      assert Entries.list_links(%{"archived" => true, "aa" => 2}) == [archived]
+      assert Entries.list_links(filters: %{"archived" => true, "aa" => 2}) == [archived]
     end
 
     test "list_links/1 filtering by archive=false", %{fixtures: [_hd | unarchived]} do
-      assert Entries.list_links(%{"archived" => "false"}) == unarchived
+      assert Entries.list_links(filters: %{"archived" => "false"}) == unarchived
     end
 
     test "list_links/1 returns disregards other invalid filters", %{fixtures: [archived | _tl]} do
-      assert Entries.list_links(%{"archived" => true, "favorite" => "invalid"}) == [archived]
+      assert Entries.list_links(filters: %{"archived" => true, "favorite" => "invalid"}) == [archived]
     end
 
   end
@@ -66,16 +72,16 @@ defmodule Links.EntriesTest do
       @value value
 
       test "list_links/1 returns all links if filter is #{value}", %{fixtures: fixtures} do
-        assert Entries.list_links(%{"favorite" => @value}) == fixtures
+        assert Entries.list_links(filters: %{"favorite" => @value}) == fixtures
       end
     end
 
     test "list_links/1 filtering by favorite=true", %{fixtures: [fav | _tl]} do
-      assert Entries.list_links(%{"favorite" => "true", "aa" => 2}) == [fav]
+      assert Entries.list_links(filters: %{"favorite" => "true", "aa" => 2}) == [fav]
     end
 
     test "list_links/1 filtering by favorite=false", %{fixtures: [_hd | not_fav]} do
-      assert Entries.list_links(%{"favorite" => false, "archived" => false}) == not_fav
+      assert Entries.list_links(filters: %{"favorite" => false, "archived" => false}) == not_fav
     end
 
   end
@@ -83,45 +89,45 @@ defmodule Links.EntriesTest do
   describe "list_links/1 filtering by tags" do
 
     test "returns all that contain at least that tag" do
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,b"}))
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "c"}))
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a"}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "a,b"}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "c"}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "a"}))
 
-      assert length(Entries.list_links(%{"tags" => "a"})) == 2
+      assert Entries.list_links(filters: %{"tags" => "a"}) |> length() == 2
 
     end
 
     test "returns all that contain all the tags" do
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,b,c"}))
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,d"}))
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "d"}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "a,b,c"}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "a,d"}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "d"}))
 
-      assert length(Entries.list_links(%{"tags" => "a,b"})) == 1
+      assert Entries.list_links(filters: %{"tags" => "a,b"}) |> length() == 1
 
     end
 
     test "returns empty if no match" do
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,b"}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "a,b"}))
 
-      assert [] == Entries.list_links(%{"tags" => "c"})
+      assert [] == Entries.list_links(filters: %{"tags" => "c"})
 
     end
 
     test "returns all matching with other filters" do
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,b,c", archived: true}))
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "c", archived: false}))
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "d", archived: true}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "a,b,c", archived: true}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "c", archived: false}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "d", archived: true}))
 
-      assert length(Entries.list_links(%{"tags" => "a,b", "archived" => true})) == 1
+      assert Entries.list_links(filters: %{"tags" => "a,b", "archived" => true}) |> length() == 1
 
     end
 
     test "returns all matching when others filters are invalid" do
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "a,b", archived: true}))
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "c", archived: false}))
-      fixture(:link, Map.merge(@create_attrs, %{csv_tags: "d", archived: true}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "a,b", archived: true}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "c", archived: false}))
+      fixture(:link, attrs: Map.merge(@create_attrs, %{csv_tags: "d", archived: true}))
 
-      assert length(Entries.list_links(%{"tags" => "a,b", "archived" => "all"})) == 1
+      assert length(Entries.list_links(filters: %{"tags" => "a,b", "archived" => "all"})) == 1
 
     end
 
@@ -129,7 +135,12 @@ defmodule Links.EntriesTest do
 
   test "get_link! returns the link with given id" do
     link = fixture(:link)
-    assert Entries.get_link!(link.id) == link
+    assert Entries.get_link!(link.id, link.user_id) == link
+  end
+
+  test "get_link! returns nil if user_id is not the owner" do
+    link = fixture(:link)
+    assert_raise Ecto.NoResultsError, fn -> Entries.get_link!(link.id, link.user_id + 2) end
   end
 
   test "create_link/1 with valid data creates a link" do
@@ -196,13 +207,13 @@ defmodule Links.EntriesTest do
   test "update_link/2 with invalid data returns error changeset" do
     link = fixture(:link)
     assert {:error, %Ecto.Changeset{}} = Entries.update_link(link, @invalid_attrs)
-    assert link == Entries.get_link!(link.id)
+    assert link == Entries.get_link!(link.id, link.user_id)
   end
 
   test "delete_link/1 deletes the link" do
     link = fixture(:link)
     assert {:ok, %Link{}} = Entries.delete_link(link)
-    assert_raise Ecto.NoResultsError, fn -> Entries.get_link!(link.id) end
+    assert_raise Ecto.NoResultsError, fn -> Entries.get_link!(link.id, link.user_id) end
   end
 
   test "change_link/1 returns a link changeset" do

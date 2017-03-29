@@ -1,5 +1,6 @@
 defmodule Links.Web.Router do
   use Links.Web, :router
+  alias Links.Web.Plugs
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -7,8 +8,9 @@ defmodule Links.Web.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug Links.Web.Plugs.StoreFiltersInSession
-    plug Links.Web.Plugs.RedirectIfFilters
+    plug Plugs.CurrentUser
+    plug Plugs.StoreFiltersInSession
+    plug Plugs.RedirectIfFilters
   end
 
   pipeline :api do

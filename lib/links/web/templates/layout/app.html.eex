@@ -17,6 +17,15 @@
       <a href="<%= link_path(@conn, :index) %>" class="item">
         <i class="newspaper big icon"></i>
       </a>
+      <%= if @conn.assigns.current_user do %>
+        <div class="right menu">
+          <div class="item"><%= @conn.assigns.current_user.email %></div>
+          <div class="item">
+            <a class="ui inverted button">Logout</a>
+          </div>
+        </div>
+      <% end %>
+
     </div>
 
     <div class="ui main container">
