@@ -1,0 +1,4 @@
+<a class="ui basic black button" href="<%= auth_path @conn, :index, "github" %>">
+  <i class="icon github"></i>
+  Sign in with GitHub
+</a>

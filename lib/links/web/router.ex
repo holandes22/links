@@ -24,4 +24,13 @@ defmodule Links.Web.Router do
     get "/clear-filters", LinkController, :clear_filters
   end
 
+  scope "/auth", Links.Web do
+    pipe_through :browser
+
+    get "/login", AuthController, :login
+    get "/logout", AuthController, :logout
+    get "/provider/:provider", AuthController, :index
+    get "/:provider/callback", AuthController, :callback
+  end
+
 end

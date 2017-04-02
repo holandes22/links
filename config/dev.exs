@@ -9,6 +9,7 @@ use Mix.Config
 config :links, Links.Web.Endpoint,
   http: [port: 4000],
   debug_errors: true,
+  #catch_errors: true,
   code_reloader: true,
   check_origin: false,
   watchers: [npm: ["run", "watch", cd: Path.expand("../assets", __DIR__)]]

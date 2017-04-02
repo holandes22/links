@@ -3,9 +3,13 @@ defmodule Links.Web.Plugs.CurrentUser do
 
   def init(opts), do: opts
 
-  def call(%{assings: %{current_user: _user}} = conn, _opts), do: conn
   def call(conn, _opts) do
-    user = Links.Repo.get(Links.Entries.User, 1)
-    assign(conn, :current_user, user)
+    case get_session(conn, :current_user_id) do
+      nil ->
+        assign(conn, :current_user, :anonymous)
+      id ->
+        assign(conn, :current_user, Links.Entries.get_user!(id))
+
+    end
   end
 end

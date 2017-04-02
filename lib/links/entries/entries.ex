@@ -74,6 +74,10 @@ defmodule Links.Entries do
     Repo.delete(link)
   end
 
+  def get_user!(id) do
+    Repo.get!(User, id)
+  end
+
   def get_or_create_user(attrs) do
     filters = [email: attrs["email"] || attrs.email]
     query = from user in User, where: ^filters

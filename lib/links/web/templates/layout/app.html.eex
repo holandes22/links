@@ -13,28 +13,29 @@
   </head>
 
   <body>
-    <div class="ui inverted large top fixed menu">
-      <a href="<%= link_path(@conn, :index) %>" class="item">
-        <i class="newspaper big icon"></i>
-      </a>
-      <%= if @conn.assigns.current_user do %>
+      <div class="ui inverted large top fixed menu">
+        <a href="<%= link_path(@conn, :index) %>" class="item">
+          <i class="newspaper big icon"></i>
+        </a>
+      <%= if @conn.assigns.current_user != :anonymous do %>
         <div class="right menu">
           <div class="item"><%= @conn.assigns.current_user.email %></div>
           <div class="item">
-            <a class="ui inverted button">Logout</a>
+            <%= link "Logout", to: auth_path(@conn, :logout), class: "ui inverted button" %>
           </div>
         </div>
       <% end %>
 
-    </div>
+      </div>
 
-    <div class="ui main container">
+      <div class="ui main container">
 
-      <%= info_message get_flash(@conn) %>
+        <%= info_message get_flash(@conn) %>
 
-      <%= render @view_module, @view_template, assigns %>
+        <%= render @view_module, @view_template, assigns %>
 
-    </div>
+      </div>
+
     <script src="<%= static_path(@conn, "/js/vendor.js") %>"></script>
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
   </body>
