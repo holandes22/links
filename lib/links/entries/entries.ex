@@ -54,9 +54,7 @@ defmodule Links.Entries do
   end
 
   def get_link!(id, user_id) do
-    from(link in Link, where: [user_id: ^user_id])
-    |> Repo.get!(id)
-    |> Repo.preload(:tags)
+    from(link in Link, where: [user_id: ^user_id], preload: [:tags]) |> Repo.get!(id)
   end
 
   def create_link(user, attrs \\ %{}) do
