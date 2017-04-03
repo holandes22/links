@@ -1,4 +1,4 @@
-defmodule Links.Web.Strategy.GitHub do
+defmodule Links.Oauth.GitHub do
   use OAuth2.Strategy
 
   alias OAuth2.Strategy.AuthCode

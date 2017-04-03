@@ -1,7 +1,7 @@
 defmodule Links.Web.AuthController do
   use Links.Web, :controller
 
-  alias Links.Web.Strategy
+  @github Application.get_env(:links, :github_strategy)
 
   def index(conn, %{"provider" => provider}) do
     redirect conn, external: authorize_url!(provider)
@@ -30,13 +30,13 @@ defmodule Links.Web.AuthController do
     |> redirect(to: "/")
   end
 
-  defp authorize_url!("github"), do: Strategy.GitHub.authorize_url!(scope: "user:email")
+  defp authorize_url!("github"), do: @github.authorize_url!(scope: "user:email")
   defp authorize_url!(_), do: raise "No matching provider available"
 
-  defp get_token!("github", code),   do: Strategy.GitHub.get_token!(code: code)
+  defp get_token!("github", code),   do: @github.get_token!(code: code)
   defp get_token!(_, _), do: raise "No matching provider available"
 
-  defp get_remote_user!("github", client), do: Strategy.GitHub.get_user!(client)
+  defp get_remote_user!("github", client), do: @github.get_user!(client)
   defp get_remote_user!(_, _), do: raise "No matching provider available"
 
 end
