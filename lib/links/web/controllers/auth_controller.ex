@@ -2,6 +2,7 @@ defmodule Links.Web.AuthController do
   use Links.Web, :controller
 
   @github Application.get_env(:links, :github_strategy)
+  @google Application.get_env(:links, :google_strategy)
 
   def index(conn, %{"provider" => provider}) do
     redirect conn, external: authorize_url!(provider)
@@ -31,12 +32,15 @@ defmodule Links.Web.AuthController do
   end
 
   defp authorize_url!("github"), do: @github.authorize_url!(scope: "user:email")
+  defp authorize_url!("google"), do: @google.authorize_url!(scope: "https://www.googleapis.com/auth/userinfo.email")
   defp authorize_url!(_), do: raise "No matching provider available"
 
   defp get_token!("github", code),   do: @github.get_token!(code: code)
+  defp get_token!("google", code),   do: @google.get_token!(code: code)
   defp get_token!(_, _), do: raise "No matching provider available"
 
   defp get_remote_user!("github", client), do: @github.get_user!(client)
+  defp get_remote_user!("google", client), do: @google.get_user!(client)
   defp get_remote_user!(_, _), do: raise "No matching provider available"
 
 end

@@ -27,8 +27,14 @@ config :links, GitHub,
   client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
   redirect_uri: System.get_env("GITHUB_REDIRECT_URI")
 
+config :links, Google,
+  client_id: System.get_env("GOOGLE_CLIENT_ID"),
+  client_secret: System.get_env("GOOGLE_CLIENT_SECRET"),
+  redirect_uri: System.get_env("GOOGLE_REDIRECT_URI")
+
 
 config :links, :github_strategy, Links.Oauth.GitHub
+config :links, :google_strategy, Links.Oauth.Google
 
 
 # Import environment specific config. This must remain at the bottom

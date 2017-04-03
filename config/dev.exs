@@ -58,5 +58,6 @@ config :links, Links.Repo,
   pool_size: 10
 
 config :links, :github_strategy, if(System.get_env("LINKS_MOCK_OAUTH") == "true", do: Links.Oauth.Mock, else: Links.Oauth.GitHub)
+config :links, :google_strategy, if(System.get_env("LINKS_MOCK_OAUTH") == "true", do: Links.Oauth.Mock, else: Links.Oauth.Google)
 
 config :oauth2, debug: true

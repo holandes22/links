@@ -1,4 +1,15 @@
-<a class="ui basic black button" href="<%= auth_path @conn, :index, "github" %>">
-  <i class="icon github"></i>
-  Sign in with GitHub
-</a>
+<div class="ui two column centered grid">
+  <div class="column">
+    <a class="ui basic black button" href="<%= auth_path @conn, :index, "github" %>">
+      <i class="icon github"></i>
+      Sign in with GitHub
+    </a>
+  </div>
+
+  <div class="column">
+    <a class="ui basic red button" href="<%= auth_path @conn, :index, "google" %>">
+      <i class="icon google"></i>
+      Sign in with Google
+    </a>
+  </div>
+</div>
